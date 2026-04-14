@@ -76,11 +76,11 @@ def base_layout(**kwargs):
         paper_bgcolor=PAPER_BG,
         plot_bgcolor=PLOT_BG,
         font=dict(color=TEXT_COL, family="Inter, sans-serif", size=12),
-        xaxis=dict(gridcolor=GRID_COL, linecolor="#E2E8F0", zeroline=False),
-        yaxis=dict(gridcolor=GRID_COL, linecolor="#E2E8F0", zeroline=False),
         margin=dict(t=20, b=40, l=10, r=10),
         **kwargs
     )
+
+AXIS_STYLE = dict(gridcolor=GRID_COL, linecolor="#E2E8F0", zeroline=False)
 
 # ── Load data ─────────────────────────────────────────────────────────────────
 @st.cache_data(ttl=3600)
@@ -210,8 +210,8 @@ if page == "Market Overview":
                       annotation_font_color=BLUE)
         fig.update_layout(
             **base_layout(height=360),
-            xaxis=dict(tickangle=-40, gridcolor=GRID_COL, linecolor="#E2E8F0"),
-            yaxis=dict(title="Sharpe Ratio", gridcolor=GRID_COL),
+            xaxis={**AXIS_STYLE, "tickangle": -40},
+            yaxis={**AXIS_STYLE, "title": "Sharpe Ratio"},
             showlegend=False,
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -235,6 +235,8 @@ if page == "Market Overview":
         fig2.update_traces(marker=dict(size=7, line=dict(width=0.5, color="white")))
         fig2.update_layout(
             **base_layout(height=360),
+            xaxis={**AXIS_STYLE, "title": "Volatility (%)"},
+            yaxis={**AXIS_STYLE, "title": "Return (%)"},
             coloraxis_colorbar=dict(title="Sharpe", thickness=12, len=0.8),
         )
         st.plotly_chart(fig2, use_container_width=True)
@@ -308,7 +310,8 @@ elif page == "Stock Analysis":
                 ))
             fig.update_layout(
                 **base_layout(height=280),
-                yaxis=dict(title="Cumulative Return (%)", gridcolor=GRID_COL),
+                xaxis=AXIS_STYLE,
+                yaxis={**AXIS_STYLE, "title": "Cumulative Return (%)"},
                 legend=dict(orientation="h", y=1.12, x=0),
             )
             st.plotly_chart(fig, use_container_width=True)
