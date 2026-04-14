@@ -49,7 +49,7 @@ returns_data  = load_returns()
 portfolio_data = load_portfolio()
 
 WINDOWS  = [c for c in list(metrics_data.values())[0].columns]
-TICKERS  = list(list(metrics_data.values())[0].index)
+TICKERS  = [t for t in list(list(metrics_data.values())[0].index) if t != 'MASI']
 TICKERS_CLEAN = [t.replace(".CS", "") for t in TICKERS]
 METRICS  = list(metrics_data.keys())
 
@@ -89,7 +89,7 @@ def fmt(val, metric):
     if pd.isna(val):
         return "—"
     if metric in PCT_METRICS:
-        return f"{val*100:.2f}%"
+        return f"{val:.2f}%"
     return f"{val:.3f}"
 
 def color_sharpe(val):
@@ -111,8 +111,8 @@ if page == "Market Overview":
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Stocks tracked",      f"{len(TICKERS)}")
     col2.metric("Avg Sharpe",          f"{sharpe_df[window].mean():.2f}")
-    col3.metric("Avg Ann. Return",     f"{ret_df[window].mean()*100:.1f}%")
-    col4.metric("Avg Ann. Volatility", f"{vol_df[window].mean()*100:.1f}%")
+    col3.metric("Avg Ann. Return",     f"{ret_df[window].mean():.1f}%")
+    col4.metric("Avg Ann. Volatility", f"{vol_df[window].mean():.1f}%")
 
     st.markdown("---")
 
@@ -143,8 +143,8 @@ if page == "Market Overview":
     with col_right:
         st.subheader("Return vs Risk")
         scatter_df = pd.DataFrame({
-            "Return":     ret_df[window] * 100,
-            "Volatility": vol_df[window] * 100,
+            "Return":     ret_df[window],
+            "Volatility": vol_df[window],
             "Sharpe":     sharpe_df[window],
             "Ticker":     [t.replace(".CS","") for t in ret_df.index],
         }).dropna()
@@ -170,7 +170,7 @@ if page == "Market Overview":
         if metric in metrics_data:
             col_data = metrics_data[metric][window]
             if metric in PCT_METRICS:
-                table[METRIC_LABELS[metric]] = (col_data * 100).round(2).astype(str) + "%"
+                table[METRIC_LABELS[metric]] = col_data.round(2).astype(str) + "%"
             else:
                 table[METRIC_LABELS[metric]] = col_data.round(3)
     table.index = [t.replace(".CS","") for t in table.index]
@@ -194,7 +194,7 @@ elif page == "Stock Analysis":
             val = metrics_data[metric].loc[ticker, window] if ticker in metrics_data[metric].index else None
             label = METRIC_LABELS.get(metric, metric)
             if val is not None and not pd.isna(val):
-                display = f"{val*100:.2f}%" if metric in PCT_METRICS else f"{val:.3f}"
+                display = f"{val:.2f}%" if metric in PCT_METRICS else f"{val:.3f}"
                 st.metric(label, display)
 
     with col2:
@@ -205,7 +205,7 @@ elif page == "Stock Analysis":
             for metric in ["Annualized_Return", "Sharpe_Ratio", "Annualized_Volatility", "Max_Drawdown"]:
                 if metric in metrics_data and ticker in metrics_data[metric].index:
                     val = metrics_data[metric].loc[ticker, w]
-                    row[METRIC_LABELS[metric]] = round(val * 100, 2) if metric in PCT_METRICS else round(val, 3)
+                    row[METRIC_LABELS[metric]] = round(val, 2) if metric in PCT_METRICS else round(val, 3)
             rows.append(row)
         window_df = pd.DataFrame(rows).set_index("Window")
         st.dataframe(window_df, use_container_width=True)
@@ -259,9 +259,9 @@ elif page == "Screener":
     max_dd     = col3.slider("Max Drawdown (%)", 5, 80, 40, 1)
 
     sharpe = metrics_data["Sharpe_Ratio"][window]
-    vol    = metrics_data["Annualized_Volatility"][window] * 100
-    dd     = metrics_data["Max_Drawdown"][window] * 100
-    ret    = metrics_data["Annualized_Return"][window] * 100
+    vol    = metrics_data["Annualized_Volatility"][window]
+    dd     = metrics_data["Max_Drawdown"][window]
+    ret    = metrics_data["Annualized_Return"][window]
 
     mask = (sharpe >= min_sharpe) & (vol <= max_vol) & (dd <= max_dd)
     filtered = pd.DataFrame({
