@@ -143,11 +143,12 @@ if page == "Market Overview":
     with col_right:
         st.subheader("Return vs Risk")
         scatter_df = pd.DataFrame({
-            "Return":     ret_df[window],
-            "Volatility": vol_df[window],
-            "Sharpe":     sharpe_df[window],
-            "Ticker":     [t.replace(".CS","") for t in ret_df.index],
+            "Return":     metrics_data["Annualized_Return"][window],
+            "Volatility": metrics_data["Annualized_Volatility"][window],
+            "Sharpe":     metrics_data["Sharpe_Ratio"][window],
         }).dropna()
+        scatter_df = scatter_df[scatter_df.index != 'MASI']
+        scatter_df["Ticker"] = [t.replace(".CS","") for t in scatter_df.index]
         fig2 = px.scatter(
             scatter_df, x="Volatility", y="Return",
             color="Sharpe", hover_name="Ticker",
