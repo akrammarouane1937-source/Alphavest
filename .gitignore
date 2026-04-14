@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+
+# Large data files — keep only Excel outputs in data/
+historical_prices.csv
+historical_prices_BACKUP.csv
+taux_sans_risque_maroc_quotidien.csv
+taux_sans_risque_maroc_2021_2026.csv
+Compo_All_Indices_*.xls
+Moroccan All Shares*.csv
+risk_metrics_sortino_corrupted.csv
+bdt_52_new.csv
+
+# Excel outputs at root level only (keep data/ folder versions)
+/risk_metrics_by_window_latest.xlsx
+/portfolio_metrics_latest.xlsx
+/portfolio_weights.xlsx
+/portfolio_metrics.xlsx
+
+# Old standalone outputs
+beta_all_stocks.xlsx
+tracking_error_all_stocks.xlsx
+var_cvar_all_stocks.xlsx
+individual_metrics.xlsx
+rolling_risk_metrics*.xlsx
+
+# Logs
+logs/
+
+# Office temp files
+~$*
+
+# PDFs and Word docs (sources, not app)
+*.pdf
+*.docx
+Sources Chapitre*/
+YOUSSEF RAPPORT LFARGH/
+BVCscrap/
+finance-skills/
+
+# Misc
+*.jpg
+*.png
+*.jpeg
