@@ -214,11 +214,11 @@ elif page == "Stock Analysis":
         # Cumulative returns chart
         if ticker in returns_data.columns:
             st.subheader("Cumulative Return (5Y)")
-            ret_series = returns_data[ticker].dropna()
+            ret_series = returns_data[ticker].dropna() / 100
             cum = (1 + ret_series).cumprod() - 1
             masi_cum = None
             if "MASI" in returns_data.columns:
-                masi_cum = (1 + returns_data["MASI"].dropna()).cumprod() - 1
+                masi_cum = (1 + returns_data["MASI"].dropna() / 100).cumprod() - 1
 
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=cum.index, y=cum.values * 100,
