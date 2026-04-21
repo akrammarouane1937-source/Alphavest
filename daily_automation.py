@@ -106,6 +106,11 @@ def calc_annualized_vol(r):
         return np.nan
     return float(r.std() * np.sqrt(TRADING_DAYS))
 
+def calc_annualized_variance(r):
+    if len(r) < MIN_OBS:
+        return np.nan
+    return float(r.var() * TRADING_DAYS)
+
 def calc_rf_annual(r_index):
     rf_aligned = rf_daily.reindex(r_index, method='ffill')
     return float((1 + rf_aligned).prod() - 1)
@@ -166,6 +171,7 @@ def compute_metrics(r, r_masi_win):
     rf_ann = calc_rf_annual(r.index)
     R_m    = calc_annualized_return(r_masi_win)
     return {
+        'Annualized_Variance':   calc_annualized_variance(r),
         'Annualized_Volatility': vol,
         'Annualized_Return':     R_ann,
         'Sharpe_Ratio':          calc_sharpe(R_ann, rf_ann, vol),
@@ -181,7 +187,7 @@ def compute_metrics(r, r_masi_win):
 _test_idx = pd.date_range('2024-01-01', periods=40, freq='B')
 METRIC_NAMES = list(compute_metrics(pd.Series([0.01, -0.01] * 20, index=_test_idx),
                                     pd.Series([0.01, -0.01] * 20, index=_test_idx)).keys())
-PCT_METRICS  = {'Annualized_Volatility', 'Annualized_Return',
+PCT_METRICS  = {'Annualized_Variance', 'Annualized_Volatility', 'Annualized_Return',
                 'Tracking_Error', 'Max_Drawdown', 'VaR_95', 'CVaR_95'}
 
 # ============================================================
@@ -398,6 +404,7 @@ ws_dr.freeze_panes = 'B2'
 
 # One sheet per metric
 METRIC_DISPLAY = {
+    'Annualized_Variance':   'Annualized Variance (%)',
     'Annualized_Volatility': 'Annualized Volatility (%)',
     'Annualized_Return':     'Annualized Return (%)',
     'Sharpe_Ratio':          'Sharpe Ratio',
