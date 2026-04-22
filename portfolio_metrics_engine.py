@@ -143,31 +143,6 @@ NAME_TO_TICKER = {
 }
 
 # ============================================================
-# LOAD & BUILD WEIGHTS
-# ============================================================
-print("Loading weights from MASI composition file...")
-masi_compo = pd.read_excel(WEIGHTS_FILE, sheet_name='MASI')
-masi_compo['Instrument_clean'] = masi_compo['Instrument'].str.strip()
-masi_compo['Ticker'] = masi_compo['Instrument_clean'].map(NAME_TO_TICKER)
-
-# Stocks not in price history → their weight will be redistributed
-unmapped = masi_compo[masi_compo['Ticker'].isna()]
-mapped   = masi_compo[masi_compo['Ticker'].notna()].copy()
-
-print(f"  Mapped: {len(mapped)} stocks  |  Unmapped (no price history): {len(unmapped)} stocks")
-print(f"  Unmapped stocks: {unmapped['Instrument_clean'].tolist()}")
-print(f"  Unmapped total weight: {unmapped['Poids'].sum():.4%}")
-
-# Redistribute unmapped weights proportionally to mapped stocks
-total_mapped_weight = mapped['Poids'].sum()
-mapped['Weight_adjusted'] = mapped['Poids'] / total_mapped_weight  # renormalise to 1.0
-
-print(f"  Adjusted weights sum: {mapped['Weight_adjusted'].sum():.6f}")
-
-# Build weights dict: ticker -> adjusted weight
-weights = dict(zip(mapped['Ticker'], mapped['Weight_adjusted']))
-
-# ============================================================
 # LOAD PRICE & RF DATA
 # ============================================================
 print("\nLoading price data...")
@@ -186,6 +161,11 @@ rf_daily = rf_daily.sort_index()
 
 masi_prices  = prices['MASI']
 stock_prices = prices.drop(columns=['MASI'])
+
+# Equal weight across all stocks in price history
+_eq_weight = 1.0 / len(stock_prices.columns)
+weights = {t: _eq_weight for t in stock_prices.columns}
+print(f"  Portfolio: {len(weights)} stocks, equal weight = {_eq_weight:.4%} each")
 
 print(f"  Price range: {prices.index[0].date()} -> {prices.index[-1].date()}")
 

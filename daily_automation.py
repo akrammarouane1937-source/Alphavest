@@ -218,9 +218,15 @@ for wlabel, (wstart, wend) in WINDOWS.items():
     print(f"  [{wlabel}] done — {len(r_masi_win)} MASI trading days")
 
 # ============================================================
-# STEP 5 — PORTFOLIO WEIGHTS
+# STEP 5 — PORTFOLIO WEIGHTS (equal weight across all 80 stocks)
 # ============================================================
-NAME_TO_TICKER = {
+# Equal weight: each stock gets 1/N where N = number of stocks in price history
+_all_stocks = list(all_returns.columns)
+_eq_weight  = 1.0 / len(_all_stocks)
+weights = {t: _eq_weight for t in _all_stocks}
+
+if False:  # kept for reference only — old MASI weights logic
+ NAME_TO_TICKER = {
     'ATTIJARIWAFA BANK':             'ATW.CS',
     'SODEP-Marsa Maroc':             'MSA.CS',
     'MANAGEM':                       'MNG.CS',
@@ -299,14 +305,7 @@ NAME_TO_TICKER = {
     'ZELLIDJA S.A':                  'ZDJ.CS',
     'IB MAROC.COM':                  'IBC.CS',
     'REBAB COMPANY':                 'REB.CS',
-}
-
-masi_compo = pd.read_excel(WEIGHTS_FILE, sheet_name='MASI')
-masi_compo['Instrument_clean'] = masi_compo['Instrument'].str.strip()
-masi_compo['Ticker'] = masi_compo['Instrument_clean'].map(NAME_TO_TICKER)
-mapped = masi_compo[masi_compo['Ticker'].notna()].copy()
-mapped['Weight'] = mapped['Poids'] / mapped['Poids'].sum()
-weights = dict(zip(mapped['Ticker'], mapped['Weight']))
+ }
 
 # ============================================================
 # STEP 6 — PORTFOLIO DAILY RETURNS
